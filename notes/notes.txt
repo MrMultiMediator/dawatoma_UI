@@ -1,0 +1,19 @@
+Make it so that connected grid elements (i.e. elements that are part of a note and hence
+connected to other grid elements in the piano roll) do NOT have colored borders between
+them and the elements they are connected to.
+
+A piano roll grid element (PRGE) is a point in note, time space corresponding to a single note,
+and a time duration of 0.25 beats.
+
+1.) Clicking a PRGE where there is no actively set note should create an active note at
+    that point in time.
+2.) Clicking and holding a PRGE where there is no actively set note should create an active
+    note at that point in time, as well as make it movable for as long as the note is held.
+    It will move in quarter-beat increments.
+3.) Clicking and holding the rightmost edge of an active note will activat the resizer.
+4.) An active resizer means that if the user slides the mouse forward and/or backward, the note
+    associated with the resizer will be resized accordingly, snapping to the nearest quarter beat
+    to the cursor.
+5.) Middle clicking an active note will delete it from the piano roll.
+6.) Clicking and holding the body of an active note will make it movable. It will move in
+    quarter-beat increments.
