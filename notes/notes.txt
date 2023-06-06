@@ -17,3 +17,18 @@ and a time duration of 0.25 beats.
 5.) Middle clicking an active note will delete it from the piano roll.
 6.) Clicking and holding the body of an active note will make it movable. It will move in
     quarter-beat increments.
+
+
+TODO for adding new notes around the piano roll:
+1.) When you click a location on the piano roll grid, it computes what row_num and col_num should be.
+2.) Then, it builds an array containing all current note elements elements on the piano roll.
+3.) Then a new note ID number is chosen based on the number of existing notes such that the ID num is unique.
+4.) A new note is created via HTML injection using the unique ID:
+    piano[0].insertAdjacentHTML('beforeend','<div id="note'+id.toString()+'" class="note"></div>')
+5.) Set the row and col number css properties of the newly created note element according what was previously
+    computed so that it is rendered correctly on the webpage:
+    qqq.style.setProperty('--row_num', parseInt(getComputedStyle(qqq).getPropertyValue('--row_num'))+1);
+
+TODO for moving notes around the piano roll:
+1.) When a note is being held, increase the z-index, so that it will never be drawn below another note
+    if being moved around.

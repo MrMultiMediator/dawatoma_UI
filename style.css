@@ -118,7 +118,7 @@
   /* Formula: 35 + col_num*width + col_num*grid_gap + 2 # Have to add 2 b/c the label column also
   has grid gaps/spacing. 35 is width of label column */
   left: calc(35px + var(--col_num)*var(--width) + var(--col_num)*var(--gg) + 2px);
-  background-color: red;
+  background-color: green;
   z-index: 5;
 }
 
