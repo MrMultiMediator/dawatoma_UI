@@ -19,9 +19,7 @@ and a time duration of 0.25 beats.
     quarter-beat increments.
 
 
-TODO for adding new notes around the piano roll:
-1.) Make it so that if you click an existing note rather than an available empty space on the piano roll,
-    a new note is not created.
+TODO for note stretching:
 
 TODO for moving notes around the piano roll:
 1.) When a note is being held, increase the z-index, so that it will never be drawn below another note

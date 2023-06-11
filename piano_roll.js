@@ -16,13 +16,17 @@ for (let i = 0; i < piano_elements.length; i++) {
 if (piano[0].querySelector('.note') != null) */
 
 piano[0].addEventListener('mousedown', pr_mousedown)
+piano[0].available = true; // Piano is available for mouseclicks/addition of new notes
 
 function pr_mousedown(e){
+    /** Add a new note in the specified location when you click on the piano roll */
     var rect = piano[0].getBoundingClientRect();
     var mouseX = e.clientX-rect.left; // Mouse X relative to piano roll
     var mouseY = e.clientY-rect.top;  // Mouse Y relative to piano roll
     var note_height = 15;
     var note_width = 15;
+
+    if (piano[0].available == false) return; // Exit if there is already a note in this location on the piano roll
 
     row_num = computeRowColNum(top_arr, mouseY);
     col_num = computeRowColNum(left_arr, mouseX);
@@ -36,6 +40,14 @@ function pr_mousedown(e){
     console.log("Mouse location: (",mouseX,", ",mouseY,")")
     console.log("Row, column: (", row_num, ", ", col_num, ")");
     console.log("Notes: ", piano[0].querySelectorAll('.note').length)
+}
+
+function note_mousedown(){
+    piano[0].available = false
+}
+
+function note_mouseup(){
+    piano[0].available = true
 }
 
 //piano[0].classList.add("note");
@@ -146,4 +158,7 @@ function createNewNote(row_num, col_num){
     note.held = false;
     note.style.setProperty('--row_num', row_num);
     note.style.setProperty('--col_num', col_num);
+    note.addEventListener('mousedown', note_mousedown);
+    note.addEventListener('mouseup', note_mouseup);
+    note.addEventListener('mouseout', note_mouseup); // TODO: remove this when moving notes is implemented
 }
