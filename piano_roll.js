@@ -29,12 +29,14 @@ function pr_mousedown(e){
     var note_height = 15;
     var note_width = 15;
 
+    row_num = computeRowNum(top_arr, mouseY);
+
     // Check if the piano has any notes
     //if (piano[0].querySelector('.note') != null)
 
     console.log("Mouse location: (",mouseX,", ",mouseY,")")
     console.log("Note height: ", parseInt(getComputedStyle(notes[0]).height))
-
+    console.log("Row number: ", row_num);
 
     /* Formula: row_num*height + row_num*grid_gap + 1  # Rows start at index 0 */
     //top: calc(var(--row_num)*var(--height) + calc(var(--row_num)*var(--gg)) + 1px);
@@ -116,4 +118,26 @@ function genTopLeftArray(height, width, grid_gap, n_rows, n_cols, directive){
     }
 
     console.log("Created the array ",array)
+
+    return array;
+}
+
+function computeRowNum(top_arr, mouseY){
+    /** Compute row number given the location of the mouse on the piano roll and the array
+        showing where all the "top" locations of each row in the piano roll are. */
+
+    // Compute difference between mouse Y and all top locations in piano roll
+    var proximity_t = top_arr.map(function(y) {return mouseY - y});
+
+    // Convert all negative values in proximity_t to 1000, so they get excluded in the min
+    // calculation. The row corresponds to the smallest positive value in proximity_t
+    var prox_x_noneg = proximity_t.map(function(x) {
+        if (x < 0) return 1000;
+        return x;})
+
+    var val = Math.min(...prox_x_noneg);
+
+    var row_num = prox_x_noneg.indexOf(val)
+
+    return row_num;
 }
