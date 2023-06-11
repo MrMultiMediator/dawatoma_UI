@@ -1,14 +1,10 @@
 const piano = document.getElementsByClassName("piano_roll"); // Get all piano_roll elements
-const notes = document.getElementsByClassName("note")
 const everything = document.getElementsByTagName("div"); // Get all div elements
 
 const top_arr = genTopLeftArray(15, 15, 1, 108, 256, "top")
 const left_arr = genTopLeftArray(15, 15, 1, 108, 256, "left")
 
 piano_elements = piano[0].children
-const note_elements = document.getElementsByClassName("note");
-console.log(note_elements.length)
-console.log(Math.floor(5/2))
 
 /*
 for (let i = 0; i < piano_elements.length; i++) { 
@@ -16,31 +12,30 @@ for (let i = 0; i < piano_elements.length; i++) {
     console.log(piano_elements[i].className != "g107_255")
 }
 
-/*console.log(everything.length);
-console.log(piano.length);
-console.log(piano[0]);*/
+// Check if the piano has any notes
+if (piano[0].querySelector('.note') != null) */
 
 piano[0].addEventListener('mousedown', pr_mousedown)
 
 function pr_mousedown(e){
     var rect = piano[0].getBoundingClientRect();
-    var mouseX = e.clientX-rect.left
-    var mouseY = e.clientY-rect.top
+    var mouseX = e.clientX-rect.left; // Mouse X relative to piano roll
+    var mouseY = e.clientY-rect.top;  // Mouse Y relative to piano roll
     var note_height = 15;
     var note_width = 15;
 
     row_num = computeRowColNum(top_arr, mouseY);
     col_num = computeRowColNum(left_arr, mouseX);
 
-    // User has selected the note labels section of the piano roll
+    // User has selected the (invalid) note labels section of the piano roll
     if (typeof col_num === 'string' || col_num instanceof String) return;
 
-    // Check if the piano has any notes
-    //if (piano[0].querySelector('.note') != null)
+    createNewNote(row_num, col_num);
 
+    console.log(piano[0].querySelectorAll('.note'))
     console.log("Mouse location: (",mouseX,", ",mouseY,")")
-    console.log("Note height: ", parseInt(getComputedStyle(notes[0]).height))
     console.log("Row, column: (", row_num, ", ", col_num, ")");
+    console.log("Notes: ", piano[0].querySelectorAll('.note').length)
 }
 
 //piano[0].classList.add("note");
@@ -63,7 +58,6 @@ if (false) {qqq.style.top = (parseInt(getComputedStyle(qqq).top, 10) + 16) + "px
 
 // Another way to change the location of a note
 //qqq.style.top = "33px";
-console.log("TOP = ",parseInt(getComputedStyle(qqq).top))
 
 //piano[0].removeChild(qqq)
 
@@ -121,9 +115,9 @@ function genTopLeftArray(height, width, grid_gap, n_rows, n_cols, directive){
 }
 
 function computeRowColNum(arr, mouseLoc){
-    /** Compute row/column number given the location of the mouse on the piano roll
-        and the array showing where all the "top"/"left" locations of each row/column
-        in the piano roll are. */
+    /** Compute row/column number on the piano roll that the mouse is in given the location
+        of the mouse on the piano roll and the array showing where all the "top"/"left"
+        locations of each row/column in the piano roll are. */
 
     // Compute difference between mouse location and all top or left locations in piano roll
     var proximity = arr.map(function(x) {return mouseLoc - x;});
@@ -142,4 +136,14 @@ function computeRowColNum(arr, mouseLoc){
     var index = prox_noneg.indexOf(val)
 
     return index;
+}
+
+function createNewNote(row_num, col_num){
+    note_num = piano[0].querySelectorAll('.note').length + 1;
+    piano[0].insertAdjacentHTML('beforeend','<div id="note'+note_num.toString()+'" class="note"></div>')
+    let note = document.getElementById("note"+note_num.toString())
+    note.note_num = note_num
+    note.held = false;
+    note.style.setProperty('--row_num', row_num);
+    note.style.setProperty('--col_num', col_num);
 }
