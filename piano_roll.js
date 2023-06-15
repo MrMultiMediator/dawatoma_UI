@@ -5,15 +5,13 @@ const top_arr = genTopLeftArray(15, 15, 1, 108, 256, "top")
 const left_arr = genTopLeftArray(15, 15, 1, 108, 256, "left")
 
 piano_elements = piano[0].children
+var default_width = 30; // Default width of new notes (in px)
 
 /*
 for (let i = 0; i < piano_elements.length; i++) { 
     console.log(piano_elements[i].className != "g107_256")
     console.log(piano_elements[i].className != "g107_255")
-}
-
-// Check if the piano has any notes
-if (piano[0].querySelector('.note') != null) */
+}*/
 
 piano[0].addEventListener('mousedown', pr_mousedown)
 piano[0].available = true; // Piano is available for mouseclicks/addition of new notes
@@ -23,8 +21,6 @@ function pr_mousedown(e){
     var rect = piano[0].getBoundingClientRect();
     var mouseX = e.clientX-rect.left; // Mouse X relative to piano roll
     var mouseY = e.clientY-rect.top;  // Mouse Y relative to piano roll
-    var note_height = 15;
-    var note_width = 15;
 
     if (piano[0].available == false) return; // Exit if there is already a note in this location on the piano roll
 
@@ -34,20 +30,32 @@ function pr_mousedown(e){
     // User has selected the (invalid) note labels section of the piano roll
     if (typeof col_num === 'string' || col_num instanceof String) return;
 
+    // Check if the piano has any notes
+    //if (piano[0].querySelector('.note') != null)
+
     createNewNote(row_num, col_num);
 
-    console.log(piano[0].querySelectorAll('.note'))
+    /*console.log(piano[0].querySelectorAll('.note'))
     console.log("Mouse location: (",mouseX,", ",mouseY,")")
     console.log("Row, column: (", row_num, ", ", col_num, ")");
-    console.log("Notes: ", piano[0].querySelectorAll('.note').length)
+    console.log("Notes: ", piano[0].querySelectorAll('.note').length)*/
 }
 
-function note_mousedown(){
+function note_mousedown(e, note = null){
+    /**  */
+    if (note == null) note = e.target;
+
     piano[0].available = false
+    note.held = true
+    console.log("Note is being held")
 }
 
-function note_mouseup(){
+function note_mouseup(e, note = null){
+    if (note == null) note = e.target;
+
     piano[0].available = true
+    note.held = false
+    console.log("Note has been released")
 }
 
 //piano[0].classList.add("note");
@@ -156,9 +164,15 @@ function createNewNote(row_num, col_num){
     let note = document.getElementById("note"+note_num.toString())
     note.note_num = note_num
     note.held = false;
+    note.style.setProperty('--width', default_width + "px")
     note.style.setProperty('--row_num', row_num);
     note.style.setProperty('--col_num', col_num);
     note.addEventListener('mousedown', note_mousedown);
     note.addEventListener('mouseup', note_mouseup);
-    note.addEventListener('mouseout', note_mouseup); // TODO: remove this when moving notes is implemented
+    //note.addEventListener('mouseout', note_mouseup); // TODO: remove this when moving notes is implemented
+
+    // Since the note is created upon mousedown, I want the program to know establish that the note is being
+    // held at the moment it is created, in case the user wants to move the note around without lifting their
+    // finger.
+    note_mousedown(null, note)
 }

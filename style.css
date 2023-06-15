@@ -49,6 +49,7 @@
   --col_num: 1;
   --width: 15px;
   --height: 15px;
+  --qn_width: 15px; /* Quarter beat width. For the time being we're using quarter beats as the smallest unit of time. */
 
   position: absolute;
   width: var(--width);
@@ -58,7 +59,7 @@
   top: calc(var(--row_num)*var(--height) + calc(var(--row_num)*var(--gg)) + 1px);
   /* Formula: 35 + col_num*width + col_num*grid_gap + 2 # Have to add 2 b/c the label column also
   has grid gaps/spacing. 35 is width of label column */
-  left: calc(35px + var(--col_num)*var(--width) + var(--col_num)*var(--gg) + 2px);
+  left: calc(35px + var(--col_num)*var(--qn_width) + var(--col_num)*var(--gg) + 2px);
 
   background-color: green;
   outline: 2px solid #d3d3d3;
