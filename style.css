@@ -63,6 +63,8 @@
   background-color: green;
   outline: 2px solid #d3d3d3;
   outline-offset: -2px;
+  border-right: 1px solid #d3d3d3;
+  border-bottom: 1px solid #d3d3d3;
 
   z-index: 5;
 }
