@@ -4,17 +4,8 @@ const everything = document.getElementsByTagName("div"); // Get all div elements
 const top_arr = genTopLeftArray(15, 15, 1, 108, 256, "top")
 const left_arr = genTopLeftArray(15, 15, 1, 108, 256, "left")
 
-piano_elements = piano[0].children
-var default_width = 30; // Default width of new notes (in px). Will be automatically set to
+var default_width = 15*3; // Default width of new notes (in px). Will be automatically set to
                         // the width of the most recently touched note (via mousedown)
-var cursor_col_rel = 0; // Relative position of the cursor column to the note column upon
-                        // note mousehold.
-
-/*
-for (let i = 0; i < piano_elements.length; i++) { 
-    console.log(piano_elements[i].className != "g107_256")
-    console.log(piano_elements[i].className != "g107_255")
-}*/
 
 piano[0].addEventListener('mousedown', pr_mousedown)
 piano[0].available = true; // Piano is available for mouseclicks/addition of new notes
@@ -33,19 +24,11 @@ function pr_mousedown(e){
     // User has selected the (invalid) note labels section of the piano roll
     if (typeof col_num === 'string' || col_num instanceof String) return;
 
-    // Check if the piano has any notes
-    //if (piano[0].querySelector('.note') != null)
-
     createNewNote(row_num, col_num, mouseX, mouseY);
-
-    /*console.log(piano[0].querySelectorAll('.note'))
-    console.log("Mouse location: (",mouseX,", ",mouseY,")")
-    console.log("Row, column: (", row_num, ", ", col_num, ")");
-    console.log("Notes: ", piano[0].querySelectorAll('.note').length)*/
 }
 
 function note_mousedown(e, note = null, mouseX = null, mouseY = null){
-    /**  */
+    /** This happens when a note is clicked. */
     var rect = piano[0].getBoundingClientRect();
 
     if (mouseX == null) var mouseX = e.clientX-rect.left; // Mouse X relative to piano roll
@@ -55,11 +38,13 @@ function note_mousedown(e, note = null, mouseX = null, mouseY = null){
 
     qb_width = parseInt(getComputedStyle(note).getPropertyValue('--qb_width')) // quarter beat width
     note.style.setProperty('z-index', 6); // Increase the z-index for notes being actively being held down.
+    note.style.backgroundColor="#0F52BA";
     piano[0].available = false
     note.held = true
     console.log("Note is being held")
 
-    cursor_col_rel = computeRowColNum(left_arr, mouseX) - getComputedStyle(note).getPropertyValue('--col_num');
+    // Initial relative position of the cursor row/column to the note row/column upon note mousehold
+    var cursor_col_rel = computeRowColNum(left_arr, mouseX) - getComputedStyle(note).getPropertyValue('--col_num');
     var cursor_row_rel = computeRowColNum(top_arr, mouseY) - getComputedStyle(note).getPropertyValue('--row_num');
 
     console.log("Cursor relative column = ",cursor_col_rel);
@@ -78,9 +63,7 @@ function note_mousedown(e, note = null, mouseX = null, mouseY = null){
         d_row = new_crr - cursor_row_rel;
         d_col = new_ccr - cursor_col_rel;
 
-        if (d_row != 0) note.style.setProperty('--row_num', parseInt(getComputedStyle(note).getPropertyValue('--row_num'))+d_row);
-        if (d_col != 0) note.style.setProperty('--col_num', parseInt(getComputedStyle(note).getPropertyValue('--col_num'))+d_col);
-
+        if (d_row != 0 || d_col != 0) moveNote(note, d_row, d_col);
     }
 
     function mouseup(e){
@@ -96,57 +79,9 @@ function note_mouseup(e, note = null){
     piano[0].available = true
     note.held = false
     note.style.setProperty('z-index', 5); // Set z-index back to 5
+    note.style.backgroundColor="green";
     console.log("Note has been released")
 }
-
-//piano[0].classList.add("note");
-// Add a note to the piano (eventually we want this to be triggered when a user clicks
-// on the piano roll)
-piano[0].insertAdjacentHTML('beforeend','<div id="note'+'1'+'" class="note"></div>')
-
-// Create variable that stores the note element we just created
-let qqq = document.getElementById("note1")
-console.log(qqq)
-qqq.note_num = 1
-
-console.log("TOP = ",parseInt(getComputedStyle(qqq).top))
-
-// One way to change the location of a note
-if (false) {qqq.style.top = (qqq.offsetTop + 16) + "px";}
-
-// Another way to change the top location of a note
-if (false) {qqq.style.top = (parseInt(getComputedStyle(qqq).top, 10) + 16) + "px";}
-
-// Another way to change the location of a note
-//qqq.style.top = "33px";
-
-//piano[0].removeChild(qqq)
-
-qqq.held = false // If the note is being held
-
-/*
-qqq.addEventListener('mousedown', mousedown);
-qqq.addEventListener('mouseup', mouseup);
-
-function mousedown(e){
-    qqq.held = true
-    console.log("held = ",qqq.held)
-    qqq.style.backgroundColor="#00FFFF";
-}
-
-function mouseup(e){
-    qqq.style.backgroundColor="green";
-    qqq.held = false
-    console.log("held = ",qqq.held)
-    qqq.style.qq = 10 + "px";
-    console.log("top = ",getComputedStyle(qqq).getPropertyValue('top'))
-    console.log("left = ",getComputedStyle(qqq).getPropertyValue('left'))
-    console.log("height = ",getComputedStyle(qqq).height)
-    console.log("gg = ",getComputedStyle(qqq).getPropertyValue('--row_num'))
-    qqq.style.setProperty('--row_num', parseInt(getComputedStyle(qqq).getPropertyValue('--row_num'))+1);
-    qqq.style.setProperty('--col_num', parseInt(getComputedStyle(qqq).getPropertyValue('--col_num'))+1);
-    console.log("gg = ",getComputedStyle(qqq).getPropertyValue('--row_num'))
-} */
 
 function genTopLeftArray(height, width, grid_gap, n_rows, n_cols, directive){
     /** Generate an array of values that corresponds to all possible "top" or "left" values for a note
@@ -216,4 +151,26 @@ function createNewNote(row_num, col_num, mouseX, mouseY){
     // held at the moment it is created, in case the user wants to move the note around without lifting their
     // finger.
     note_mousedown(null, note, mouseX, mouseY)
+
+    console.log("Row, col: ",getComputedStyle(note).getPropertyValue('--row_num'),", ",getComputedStyle(note).getPropertyValue('--col_num'))
+}
+
+function moveNote(note, d_row, d_col){
+    conditions = []
+    conditions.push(!(parseInt(getComputedStyle(note).getPropertyValue('--row_num')) == 0 && d_row < 0));
+    conditions.push(!(parseInt(getComputedStyle(note).getPropertyValue('--col_num')) == 0 && d_col < 0));
+    console.log(allConditions(conditions));
+    if (d_row != 0){
+        if (allConditions(conditions)) note.style.setProperty('--row_num', parseInt(getComputedStyle(note).getPropertyValue('--row_num'))+d_row);
+    }
+    if (d_col != 0){
+        if (allConditions(conditions)) note.style.setProperty('--col_num', parseInt(getComputedStyle(note).getPropertyValue('--col_num'))+d_col);
+    }
+}
+
+function allConditions(conditions){
+    for (let i = 0; i < conditions.length; i++) {
+        if (conditions[i] == false) return false;
+    }
+    return true;
 }

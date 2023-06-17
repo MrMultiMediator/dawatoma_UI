@@ -22,3 +22,34 @@ and a time duration of 0.25 beats.
 TODO for note stretching:
 
 TODO for note deletion:
+
+TODO for note moving:
+1.) Make it so the note can't be moved off screen (mouseoff on whole piano roll?)
+
+
+
+Cool/interesting things that I found during testing but never ended up using:
+=========================================
+piano_elements = piano[0].children
+for (let i = 0; i < piano_elements.length; i++) {
+    console.log(piano_elements[i].className != "g107_256")
+    console.log(piano_elements[i].className != "g107_255")
+}
+// Check if the piano has any notes
+//if (piano[0].querySelector('.note') != null)
+
+//piano[0].classList.add("note");
+
+console.log("TOP = ",parseInt(getComputedStyle(note).top))
+
+// One way to change the location of a note
+if (false) {qqq.style.top = (qqq.offsetTop + 16) + "px";}
+
+// Another way to change the top location of a note
+if (false) {qqq.style.top = (parseInt(getComputedStyle(qqq).top, 10) + 16) + "px";}
+
+// Another way to change the location of a note
+//qqq.style.top = "33px";
+
+piano[0].removeChild(qqq)
+=========================================
