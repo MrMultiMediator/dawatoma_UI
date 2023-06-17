@@ -11,12 +11,15 @@ piano[0].addEventListener('mousedown', pr_mousedown)
 piano[0].available = true; // Piano is available for mouseclicks/addition of new notes
 
 function pr_mousedown(e){
-    /** Add a new note in the specified location when you click on the piano roll */
+    /** Add a new note in the specified location when you left click on the piano roll */
+    if (piano[0].available == false) return; // Exit if there is already a note in this location on the piano roll
+
+    // Exit if right or middle click
+    if (!leftClickFilter(e)) return;
+
     var rect = piano[0].getBoundingClientRect();
     var mouseX = e.clientX-rect.left; // Mouse X relative to piano roll
     var mouseY = e.clientY-rect.top;  // Mouse Y relative to piano roll
-
-    if (piano[0].available == false) return; // Exit if there is already a note in this location on the piano roll
 
     row_num = computeRowColNum(top_arr, mouseY);
     col_num = computeRowColNum(left_arr, mouseX);
@@ -28,7 +31,11 @@ function pr_mousedown(e){
 }
 
 function note_mousedown(e, note = null, mouseX = null, mouseY = null){
-    /** This happens when a note is clicked. */
+    /** This happens when a note is left clicked. */
+
+    // Exit if right or middle click
+    if (!leftClickFilter(e)) return;
+
     var rect = piano[0].getBoundingClientRect();
 
     if (mouseX == null) var mouseX = e.clientX-rect.left; // Mouse X relative to piano roll
@@ -41,7 +48,6 @@ function note_mousedown(e, note = null, mouseX = null, mouseY = null){
     note.style.backgroundColor="#0F52BA";
     piano[0].available = false
     note.held = true
-    console.log("Note is being held")
 
     // Initial relative position of the cursor row/column to the note row/column upon note mousehold
     var cursor_col_rel = computeRowColNum(left_arr, mouseX) - getComputedStyle(note).getPropertyValue('--col_num');
@@ -74,13 +80,24 @@ function note_mousedown(e, note = null, mouseX = null, mouseY = null){
 }
 
 function note_mouseup(e, note = null){
+    if (!leftClickFilter(e)) return;
     if (note == null) note = e.target;
 
     piano[0].available = true
     note.held = false
     note.style.setProperty('z-index', 5); // Set z-index back to 5
     note.style.backgroundColor="green";
-    console.log("Note has been released")
+}
+
+function note_rightclick(e){
+    console.log(document.getElementsByClassName("note"))
+
+    note = e.target;
+
+    e.preventDefault();
+    note.parentNode.removeChild(note);
+    piano[0].available = true;
+    console.log("Right mouse button has been clicked, and element deleted.");
 }
 
 function genTopLeftArray(height, width, grid_gap, n_rows, n_cols, directive){
@@ -145,7 +162,7 @@ function createNewNote(row_num, col_num, mouseX, mouseY){
     note.style.setProperty('--col_num', col_num);
     note.addEventListener('mousedown', note_mousedown);
     note.addEventListener('mouseup', note_mouseup);
-    //note.addEventListener('mouseout', note_mouseup); // TODO: remove this when moving notes is implemented
+    note.addEventListener('contextmenu', note_rightclick);
 
     // Since the note is created upon mousedown, I want the program to know establish that the note is being
     // held at the moment it is created, in case the user wants to move the note around without lifting their
@@ -159,7 +176,7 @@ function moveNote(note, d_row, d_col){
     conditions = []
     conditions.push(!(parseInt(getComputedStyle(note).getPropertyValue('--row_num')) == 0 && d_row < 0));
     conditions.push(!(parseInt(getComputedStyle(note).getPropertyValue('--col_num')) == 0 && d_col < 0));
-    console.log(allConditions(conditions));
+
     if (d_row != 0){
         if (allConditions(conditions)) note.style.setProperty('--row_num', parseInt(getComputedStyle(note).getPropertyValue('--row_num'))+d_row);
     }
@@ -171,6 +188,14 @@ function moveNote(note, d_row, d_col){
 function allConditions(conditions){
     for (let i = 0; i < conditions.length; i++) {
         if (conditions[i] == false) return false;
+    }
+    return true;
+}
+
+function leftClickFilter(e){
+    /** Only return true if the mouse button being clicked is the left mouse button. */
+    if (e != null){
+        if (e.which == 3 || e.which == 2) return false;
     }
     return true;
 }

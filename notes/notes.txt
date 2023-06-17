@@ -22,6 +22,8 @@ and a time duration of 0.25 beats.
 TODO for note stretching:
 
 TODO for note deletion:
+1.) Note gets deleted upon right click.
+2.) Note numbers (indexes) get rewritten when one is deleted.
 
 TODO for note moving:
 1.) Make it so the note can't be moved off screen (mouseoff on whole piano roll?)
