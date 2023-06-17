@@ -5,7 +5,10 @@ const top_arr = genTopLeftArray(15, 15, 1, 108, 256, "top")
 const left_arr = genTopLeftArray(15, 15, 1, 108, 256, "left")
 
 piano_elements = piano[0].children
-var default_width = 30; // Default width of new notes (in px)
+var default_width = 30; // Default width of new notes (in px). Will be automatically set to
+                        // the width of the most recently touched note (via mousedown)
+var cursor_col_rel = 0; // Relative position of the cursor column to the note column upon
+                        // note mousehold.
 
 /*
 for (let i = 0; i < piano_elements.length; i++) { 
@@ -33,7 +36,7 @@ function pr_mousedown(e){
     // Check if the piano has any notes
     //if (piano[0].querySelector('.note') != null)
 
-    createNewNote(row_num, col_num);
+    createNewNote(row_num, col_num, mouseX, mouseY);
 
     /*console.log(piano[0].querySelectorAll('.note'))
     console.log("Mouse location: (",mouseX,", ",mouseY,")")
@@ -41,13 +44,50 @@ function pr_mousedown(e){
     console.log("Notes: ", piano[0].querySelectorAll('.note').length)*/
 }
 
-function note_mousedown(e, note = null){
+function note_mousedown(e, note = null, mouseX = null, mouseY = null){
     /**  */
+    var rect = piano[0].getBoundingClientRect();
+
+    if (mouseX == null) var mouseX = e.clientX-rect.left; // Mouse X relative to piano roll
+    if (mouseY == null) var mouseY = e.clientY-rect.top; // Mouse X relative to piano roll
+
     if (note == null) note = e.target;
 
+    qb_width = parseInt(getComputedStyle(note).getPropertyValue('--qb_width')) // quarter beat width
+    note.style.setProperty('z-index', 6); // Increase the z-index for notes being actively being held down.
     piano[0].available = false
     note.held = true
     console.log("Note is being held")
+
+    cursor_col_rel = computeRowColNum(left_arr, mouseX) - getComputedStyle(note).getPropertyValue('--col_num');
+    var cursor_row_rel = computeRowColNum(top_arr, mouseY) - getComputedStyle(note).getPropertyValue('--row_num');
+
+    console.log("Cursor relative column = ",cursor_col_rel);
+
+    window.addEventListener('mousemove', mousemove);
+    window.addEventListener('mouseup', mouseup);
+
+    function mousemove(e){
+        /** If the position of the cursor's row or column relative to the note changes, modify the note's row 
+         *  or column to restore the original relative position (i.e. move the note along with the cursor) */
+        x = e.clientX-rect.left;
+        y = e.clientY-rect.top;
+        new_ccr = computeRowColNum(left_arr, x) - getComputedStyle(note).getPropertyValue('--col_num');
+        new_crr = computeRowColNum(top_arr, y) - getComputedStyle(note).getPropertyValue('--row_num');
+
+        d_row = new_crr - cursor_row_rel;
+        d_col = new_ccr - cursor_col_rel;
+
+        if (d_row != 0) note.style.setProperty('--row_num', parseInt(getComputedStyle(note).getPropertyValue('--row_num'))+d_row);
+        if (d_col != 0) note.style.setProperty('--col_num', parseInt(getComputedStyle(note).getPropertyValue('--col_num'))+d_col);
+
+    }
+
+    function mouseup(e){
+        window.removeEventListener('mousemove', mousemove)
+        window.removeEventListener('mouseup', mouseup)
+    }
+
 }
 
 function note_mouseup(e, note = null){
@@ -55,6 +95,7 @@ function note_mouseup(e, note = null){
 
     piano[0].available = true
     note.held = false
+    note.style.setProperty('z-index', 5); // Set z-index back to 5
     console.log("Note has been released")
 }
 
@@ -158,7 +199,7 @@ function computeRowColNum(arr, mouseLoc){
     return index;
 }
 
-function createNewNote(row_num, col_num){
+function createNewNote(row_num, col_num, mouseX, mouseY){
     note_num = piano[0].querySelectorAll('.note').length + 1;
     piano[0].insertAdjacentHTML('beforeend','<div id="note'+note_num.toString()+'" class="note"></div>')
     let note = document.getElementById("note"+note_num.toString())
@@ -174,5 +215,5 @@ function createNewNote(row_num, col_num){
     // Since the note is created upon mousedown, I want the program to know establish that the note is being
     // held at the moment it is created, in case the user wants to move the note around without lifting their
     // finger.
-    note_mousedown(null, note)
+    note_mousedown(null, note, mouseX, mouseY)
 }

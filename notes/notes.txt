@@ -21,6 +21,4 @@ and a time duration of 0.25 beats.
 
 TODO for note stretching:
 
-TODO for moving notes around the piano roll:
-1.) When a note is being held, increase the z-index, so that it will never be drawn below another note
-    if being moved around.
+TODO for note deletion:
