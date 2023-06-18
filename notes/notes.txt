@@ -18,15 +18,15 @@ and a time duration of 0.25 beats.
 6.) Clicking and holding the body of an active note will make it movable. It will move in
     quarter-beat increments.
 
+TODO for note deletion:
+1.) Note numbers (indexes) get rewritten when a note is deleted.
 
 TODO for note stretching:
 
-TODO for note deletion:
-1.) Note gets deleted upon right click.
-2.) Note numbers (indexes) get rewritten when one is deleted.
-
 TODO for note moving:
-1.) Make it so the note can't be moved off screen (mouseoff on whole piano roll?)
+1.) Make it so the note can't be moved off screen (mouseoff on whole piano roll?) Could the solution
+    to this be to use an element event (note event) rather than a window event for the mousemove
+    function?
 
 
 

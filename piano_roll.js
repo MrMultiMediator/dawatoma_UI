@@ -44,8 +44,8 @@ function note_mousedown(e, note = null, mouseX = null, mouseY = null){
     if (note == null) note = e.target;
 
     qb_width = parseInt(getComputedStyle(note).getPropertyValue('--qb_width')) // quarter beat width
-    note.style.setProperty('z-index', 6); // Increase the z-index for notes being actively being held down.
-    note.style.backgroundColor="#0F52BA";
+    note.style.setProperty('z-index', 6); // Increase the z-index for notes actively being held down.
+    note.style.backgroundColor="#0F52BA"; // Change background color for notes actively being held down.
     piano[0].available = false
     note.held = true
 
@@ -55,11 +55,14 @@ function note_mousedown(e, note = null, mouseX = null, mouseY = null){
 
     console.log("Cursor relative column = ",cursor_col_rel);
 
+    // Listen for mousemove events during this event (while the note is being held down). This is
+    // how the user moves the note around.
     window.addEventListener('mousemove', mousemove);
     window.addEventListener('mouseup', mouseup);
 
     function mousemove(e){
-        /** If the position of the cursor's row or column relative to the note changes, modify the note's row 
+        /** Note moving function:
+         *  If the position of the cursor's row or column relative to the note changes, modify the note's row 
          *  or column to restore the original relative position (i.e. move the note along with the cursor) */
         x = e.clientX-rect.left;
         y = e.clientY-rect.top;
@@ -80,16 +83,18 @@ function note_mousedown(e, note = null, mouseX = null, mouseY = null){
 }
 
 function note_mouseup(e, note = null){
+    /** This happens when a left-clicked mouseheld note is released. */
     if (!leftClickFilter(e)) return;
     if (note == null) note = e.target;
 
     piano[0].available = true
     note.held = false
     note.style.setProperty('z-index', 5); // Set z-index back to 5
-    note.style.backgroundColor="green";
+    note.style.backgroundColor="green"; // Set background color back to green
 }
 
 function note_rightclick(e){
+    /** Delete a note when it is rightclicked. */
     console.log(document.getElementsByClassName("note"))
 
     note = e.target;
@@ -130,13 +135,14 @@ function genTopLeftArray(height, width, grid_gap, n_rows, n_cols, directive){
 function computeRowColNum(arr, mouseLoc){
     /** Compute row/column number on the piano roll that the mouse is in given the location
         of the mouse on the piano roll and the array showing where all the "top"/"left"
-        locations of each row/column in the piano roll are. */
+        locations of each row/column in the piano roll are. Row/col is chosen based on
+        nearest top/left location in arr. */
 
     // Compute difference between mouse location and all top or left locations in piano roll
     var proximity = arr.map(function(x) {return mouseLoc - x;});
 
     // Convert all negative values in proximity_t to 1000, so they get excluded in the min
-    // calculation. The row corresponds to the smallest positive value in proximity_t
+    // calculation. The row corresponds to the smallest positive value in proximity
     var prox_noneg = proximity.map(function(x) {
         if (x < 0) return 1000;
         return x;})
@@ -152,27 +158,37 @@ function computeRowColNum(arr, mouseLoc){
 }
 
 function createNewNote(row_num, col_num, mouseX, mouseY){
+    /** Create a new note on the piano roll. */
     note_num = piano[0].querySelectorAll('.note').length + 1;
+
+    // Add note to the DOM
     piano[0].insertAdjacentHTML('beforeend','<div id="note'+note_num.toString()+'" class="note"></div>')
+
+    // Create a JS abstraction of the note by pulling the element from the document
     let note = document.getElementById("note"+note_num.toString())
+
+    // Set various CSS properties for this note to the values dictated by this code
     note.note_num = note_num
     note.held = false;
     note.style.setProperty('--width', default_width + "px")
     note.style.setProperty('--row_num', row_num);
     note.style.setProperty('--col_num', col_num);
+
+    // Add mouse event listeners to the note to enable the user to manipulate it
     note.addEventListener('mousedown', note_mousedown);
     note.addEventListener('mouseup', note_mouseup);
     note.addEventListener('contextmenu', note_rightclick);
 
-    // Since the note is created upon mousedown, I want the program to know establish that the note is being
-    // held at the moment it is created, in case the user wants to move the note around without lifting their
-    // finger.
+    // Since the note is created upon mousedown, I want the program to establish that the note is being
+    // held at the moment it is created, in case the user wants to move the note around immediately
+    // after creation without lifting their finger.
     note_mousedown(null, note, mouseX, mouseY)
 
     console.log("Row, col: ",getComputedStyle(note).getPropertyValue('--row_num'),", ",getComputedStyle(note).getPropertyValue('--col_num'))
 }
 
 function moveNote(note, d_row, d_col){
+    /** Move the note by changing row and/or column values if the conditions are right. */
     conditions = []
     conditions.push(!(parseInt(getComputedStyle(note).getPropertyValue('--row_num')) == 0 && d_row < 0));
     conditions.push(!(parseInt(getComputedStyle(note).getPropertyValue('--col_num')) == 0 && d_col < 0));
@@ -186,6 +202,7 @@ function moveNote(note, d_row, d_col){
 }
 
 function allConditions(conditions){
+    /** Check an array of booleans, and only return true if every element is true. */
     for (let i = 0; i < conditions.length; i++) {
         if (conditions[i] == false) return false;
     }

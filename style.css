@@ -42,7 +42,9 @@
 }
 
 /* This should be nested inside the piano_roll class at the html level so that the position becomes
-   relative to the entire piano roll */
+   relative to the entire piano roll. The javascript does that when note creation is triggered, by
+   invoking the command
+   piano[0].insertAdjacentHTML('beforeend','<div id="note'+note_num.toString()+'" class="note"></div>') */
 .note {
   --gg: 1px; /* grid-gap (same as in piano_roll)  */
   --row_num: 1;
